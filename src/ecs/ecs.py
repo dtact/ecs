@@ -5,8 +5,8 @@ import dateutil.parser
 from datetime import datetime
 
 
-class Int(int): # noqa D101
-    def __new__(cls, val): # noqa D102
+class Int(int):  # noqa D101
+    def __new__(cls, val):  # noqa D102
 
         if val is None:
             return
@@ -33,14 +33,12 @@ class Timestamp(str):
 
         if isinstance(val, str):
             # normalize
-            val = dateutil.parser.isoparse(val) \
-                                 .isoformat('T').replace('+00:00', 'Z')
+            val = dateutil.parser.isoparse(val).isoformat("T").replace("+00:00", "Z")
         elif isinstance(val, float) or isinstance(val, int):
             # normalize
-            val = datetime.fromtimestamp(val) \
-                          .isoformat('T').replace('+00:00', 'Z')
+            val = datetime.fromtimestamp(val).isoformat("T").replace("+00:00", "Z")
         else:
-            val = val.isoformat('T').replace('+00:00', 'Z')
+            val = val.isoformat("T").replace("+00:00", "Z")
 
         return super().__new__(cls, val)
 
@@ -52,6 +50,7 @@ class Duration(Int):
 class Path(String):
     pass
 
+
 class Query(String):
     def __new__(cls, val):
         if val is None:
@@ -61,12 +60,14 @@ class Query(String):
                 return
 
             from urllib.parse import urlencode
+
             val = urlencode(val)
             return super().__new__(cls, val)
         elif type(val) is str:
             return super().__new__(cls, val)
         else:
             raise Exception("Unsupported type for query")
+
 
 class Provider(String):
     pass
@@ -143,14 +144,14 @@ class Packets(Int):
 
 
 class MAC(String):
-    """
-    """
+    """ """
+
     pass
 
 
 class Address(String):
-    """
-    """
+    """ """
+
     pass
 
 
@@ -172,7 +173,9 @@ class Base(dict):
                     d[k] = arg
 
             if not allowed:
-                raise Exception(f"Type {type(arg)} not supported for {type(self)}, allowed are: {self._allowed}")
+                raise Exception(
+                    f"Type {type(arg)} not supported for {type(self)}, allowed are: {self._allowed}"
+                )
 
         super().__init__(d)
 
@@ -182,34 +185,42 @@ class Original(String):
 
 
 class User(Base):
-    _allowed = {'name': Name, 'id': Id}
+    _allowed = {"name": Name, "id": Id}
 
 
 class Target(User):
     pass
 
 
-User._allowed.update({'target': Target})
+User._allowed.update({"target": Target})
 
 
 class Error(Base):
-    _allowed = {'code': Code, 'id': Id, 'message': Message}
+    _allowed = {"code": Code, "id": Id, "message": Message}
 
 
 class Event(Base):
     "Meta-information specific to ECS."
 
     _allowed = {
-        'original': Original, 'provider': Provider, 'action': Action, 'id': Id,
-        'category': Category, 'type': Type, 'dataset': Dataset, 'kind': Kind,
-        'outcome': Outcome, 'group': Group, 'duration': Duration,
+        "original": Original,
+        "provider": Provider,
+        "action": Action,
+        "id": Id,
+        "category": Category,
+        "type": Type,
+        "dataset": Dataset,
+        "kind": Kind,
+        "outcome": Outcome,
+        "group": Group,
+        "duration": Duration,
     }
 
     def __init__(self, name, *args, type=None):
         super().__init__(name, *args)
 
-        if self.get('original'):
-            self['original'] = json.dumps(self.get('original'))
+        if self.get("original"):
+            self["original"] = json.dumps(self.get("original"))
 
 
 class Source(Base):
@@ -227,21 +238,26 @@ class Source(Base):
     identification of the client and server roles, then the client
     and server fields should also be populated.
     """
+
     _allowed = {
-                'address': Address, 'bytes': Bytes, 'packets': Packets,
-                'port': Port, 'user': User
-                }
+        "address": Address,
+        "bytes": Bytes,
+        "packets": Packets,
+        "port": Port,
+        "user": User,
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
 
-        address = self.get('address')
+        address = self.get("address")
         if address:
             try:
                 import ipaddress
-                self['ip'] = str(ipaddress.ip_address(address))
+
+                self["ip"] = str(ipaddress.ip_address(address))
             except ValueError:
-                self['domain'] = address
+                self["domain"] = address
 
 
 class Destination(Source):
@@ -257,7 +273,7 @@ class Server(Source):
 
 
 class Account(Base):
-    _allowed = {'id': Id, 'name': Name}
+    _allowed = {"id": Id, "name": Name}
 
 
 class Region(String):
@@ -265,7 +281,7 @@ class Region(String):
 
 
 class Useragent(Base):
-    _allowed = {'original': Original}
+    _allowed = {"original": Original}
 
 
 class IP(list):
@@ -297,11 +313,11 @@ class Users(list):
 
 
 class Related(Base):
-    _allowed = {'ip': IP, 'hash': Hash, 'hosts': Hosts, 'users': Users}
+    _allowed = {"ip": IP, "hash": Hash, "hosts": Hosts, "user": Users}
 
 
 class Cloud(Base):
-    _allowed = {'account': Account, 'region': Region}
+    _allowed = {"account": Account, "region": Region}
 
 
 class Method(String):
@@ -309,27 +325,27 @@ class Method(String):
 
 
 class StatusCode(Int):
-    """
-    """
+    """ """
+
     pass
 
 
 class Version(String):
-    """
-    """
+    """ """
+
     pass
 
 
 class Request(Base):
-    """
-    """
-    _allowed = {'method': Method}
+    """ """
+
+    _allowed = {"method": Method}
 
 
 class Response(Base):
-    """
-    """
-    _allowed = {'status_code': StatusCode}
+    """ """
+
+    _allowed = {"status_code": StatusCode}
 
 
 class HTTP(Base):
@@ -337,7 +353,8 @@ class HTTP(Base):
     Fields related to HTTP activity. Use the url field set to store the url of
     the request.
     """
-    _allowed = {'request': Request, 'response': Response, 'version': Version}
+
+    _allowed = {"request": Request, "response": Response, "version": Version}
 
 
 class URL(Base):
@@ -347,7 +364,8 @@ class URL(Base):
     URL fields provide support for complete or partial URLs, and supports the
     breaking down into scheme, domain, path, and so on.
     """
-    _allowed = {'original': Original, 'path': Path, 'query': Query}
+
+    _allowed = {"original": Original, "path": Path, "query": Query}
 
 
 class Custom(dict):
@@ -377,19 +395,20 @@ class Custom(dict):
         if d == {}:
             return
 
-        super().__init__({
-            name: d
-        })
+        super().__init__({name: d})
 
 
 class Trace(Base):
-    _allowed = {'id': Id}
+    _allowed = {"id": Id}
+
 
 class Cipher(String):
     pass
 
+
 class TLS(Base):
-    _allowed = {'version': Version, 'cipher': Cipher}
+    _allowed = {"version": Version, "cipher": Cipher}
+
 
 class ECS(Base):
     """
@@ -399,14 +418,25 @@ class ECS(Base):
     and metrics.
     """
 
-    _allowed = {'source': Source, 'destination': Destination, 'client': Client,
-                'server': Server, 'event': Event, '@timestamp': Timestamp,
-                'cloud': Cloud, 'user_agent': Useragent, 'error': Error,
-                'custom': Custom, 'related': Related, 'http': HTTP, 'url': URL,
-                'tls': TLS, 'trace': Trace,
-                }
+    _allowed = {
+        "source": Source,
+        "destination": Destination,
+        "client": Client,
+        "server": Server,
+        "event": Event,
+        "@timestamp": Timestamp,
+        "cloud": Cloud,
+        "user_agent": Useragent,
+        "error": Error,
+        "custom": Custom,
+        "related": Related,
+        "http": HTTP,
+        "url": URL,
+        "tls": TLS,
+        "trace": Trace,
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
 
-        self['ecs'] = {'version': '1.9.0'}
+        self["ecs"] = {"version": "1.9.0"}
